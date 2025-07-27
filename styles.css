@@ -590,6 +590,13 @@ section {
     margin-top: var(--spacing-xs);
 }
 
+.eligibility-note {
+    font-size: 0.75rem;
+    color: var(--warm-gray);
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+}
+
 .error-message {
     color: var(--error-red);
     font-size: 0.875rem;
