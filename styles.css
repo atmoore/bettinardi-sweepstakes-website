@@ -95,6 +95,7 @@ body {
     padding-top: 80px;
 }
 
+
 .hero-section::before {
     content: '';
     position: absolute;
@@ -232,6 +233,258 @@ section {
     border-radius: 2px;
 }
 
+/* Disclaimer Section */
+.disclaimer-section {
+    background: var(--cream);
+    padding: var(--spacing-lg) 0;
+}
+
+.disclaimer-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.disclaimer-text {
+    background: rgba(139, 69, 19, 0.1);
+    border-left: 4px solid var(--bronze-accent);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--warm-gray);
+}
+
+.disclaimer-text strong {
+    color: var(--dark-wood);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    max-width: 800px;
+    max-height: 90vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-heavy);
+}
+
+.modal-header {
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--dark-wood) 0%, var(--bourbon-brown) 100%);
+    color: var(--off-white);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.modal-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--gold-accent);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gold-accent);
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-normal);
+}
+
+.modal-close:hover {
+    background: rgba(212, 175, 55, 0.2);
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-body .terms-content h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--dark-wood);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--gold-accent);
+    padding-bottom: var(--spacing-xs);
+}
+
+.modal-body .terms-content h3:first-child {
+    margin-top: 0;
+}
+
+.modal-body .terms-content h4 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--bronze-accent);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.modal-body .terms-content p {
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+    color: var(--charcoal);
+}
+
+.modal-body .terms-content ul {
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-body .terms-content li {
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.5;
+}
+
+.modal-body .terms-content a {
+    color: var(--bronze-accent);
+    text-decoration: underline;
+}
+
+.modal-body .terms-content a:hover {
+    color: var(--copper-accent);
+}
+
+.modal-footer,
+.modal-footer-info {
+    padding: var(--spacing-lg);
+    border-top: 2px solid var(--cream);
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    background: var(--off-white);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.info-close-btn {
+    background: linear-gradient(135deg, var(--bronze-accent) 0%, var(--copper-accent) 100%);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-light);
+}
+
+.info-close-btn:hover {
+    background: linear-gradient(135deg, var(--copper-accent) 0%, var(--bronze-accent) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.accept-btn {
+    background: linear-gradient(135deg, var(--bronze-accent) 0%, var(--copper-accent) 100%);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-light);
+}
+
+.accept-btn:hover {
+    background: linear-gradient(135deg, var(--copper-accent) 0%, var(--bronze-accent) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.decline-btn {
+    background: var(--warm-gray);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.decline-btn:hover {
+    background: var(--charcoal);
+    transform: translateY(-1px);
+}
+
+/* Terms Status and Link Styling */
+.terms-link {
+    color: var(--bronze-accent);
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.terms-link:hover {
+    color: var(--copper-accent);
+}
+
+.terms-status {
+    font-size: 0.875rem;
+    color: var(--bronze-accent);
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+    padding: var(--spacing-xs);
+    background: rgba(184, 115, 51, 0.1);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--bronze-accent);
+}
+
+.terms-accepted {
+    color: var(--success-bronze);
+    border-left-color: var(--success-bronze);
+    background: rgba(184, 134, 11, 0.1);
+}
+
+/* Disabled checkbox styling */
+.form-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-checkbox:disabled + .checkbox-label {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 /* Entry Form Section */
 .entry-form-section {
     background: var(--off-white);
@@ -284,6 +537,14 @@ section {
     color: var(--dark-wood);
     margin-bottom: var(--spacing-xs);
     font-size: 1rem;
+}
+
+.entry-note {
+    font-size: 0.9rem;
+    color: var(--bronze-accent);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+    font-style: italic;
 }
 
 .required {
@@ -477,6 +738,15 @@ section {
     font-size: 0.95rem;
 }
 
+.ticket-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    margin: var(--spacing-md) 0;
+    border-left: 3px solid var(--gold-accent);
+    font-weight: 500;
+}
+
 /* About Putter Section */
 .about-putter-section {
     background: var(--cream);
@@ -647,6 +917,28 @@ section {
     border-radius: var(--radius-sm);
     margin-bottom: var(--spacing-sm);
     border-left: 4px solid var(--gold-accent);
+}
+
+.entry-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.entry-section h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--gold-accent);
+    margin-bottom: var(--spacing-sm);
+    font-weight: 600;
+}
+
+.bonus-entry {
+    border-left-color: var(--bronze-accent);
+    background: rgba(184, 115, 51, 0.1);
+}
+
+.paid-entries .entry-option {
+    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .drawing-info ul {
@@ -872,6 +1164,40 @@ footer {
     .contact-details {
         flex-direction: column;
         gap: var(--spacing-sm);
+    }
+    
+    /* Mobile modal adjustments */
+    .modal {
+        padding: var(--spacing-sm);
+    }
+    
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: var(--spacing-md);
+    }
+    
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: var(--spacing-md);
+    }
+    
+    .modal-footer,
+    .modal-footer-info {
+        padding: var(--spacing-md);
+        flex-direction: column;
+    }
+    
+    .accept-btn,
+    .decline-btn,
+    .info-close-btn {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
     }
 }
 

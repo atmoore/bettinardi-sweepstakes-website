@@ -141,6 +141,82 @@ document.addEventListener('DOMContentLoaded', () => {
         return /^[a-z]{2,6}$/.test(tld); // Only letters in TLD
     }
 
+    // Get entry details based on selected type
+    function getEntryDetails(entryType) {
+        const entryTypes = {
+            'paid-25': {
+                totalEntries: '11 entries (10 + 1 bonus)',
+                ticketNumbers: '11 unique 9-digit ticket numbers',
+                paymentAmount: '$25',
+                paymentStatus: 'Payment Required - Send $25 to @BOURBONDUDEZ',
+                venmoNote: 'Venmo $25 to @BOURBONDUDEZ'
+            },
+            'paid-50': {
+                totalEntries: '21 entries (20 + 1 bonus)',
+                ticketNumbers: '21 unique 9-digit ticket numbers',
+                paymentAmount: '$50',
+                paymentStatus: 'Payment Required - Send $50 to @BOURBONDUDEZ',
+                venmoNote: 'Venmo $50 to @BOURBONDUDEZ'
+            },
+            'paid-75': {
+                totalEntries: '31 entries (30 + 1 bonus)',
+                ticketNumbers: '31 unique 9-digit ticket numbers',
+                paymentAmount: '$75',
+                paymentStatus: 'Payment Required - Send $75 to @BOURBONDUDEZ',
+                venmoNote: 'Venmo $75 to @BOURBONDUDEZ'
+            },
+            'paid-100': {
+                totalEntries: '41 entries (40 + 1 bonus)',
+                ticketNumbers: '41 unique 9-digit ticket numbers',
+                paymentAmount: '$100',
+                paymentStatus: 'Payment Required - Send $100 to @BOURBONDUDEZ',
+                venmoNote: 'Venmo $100 to @BOURBONDUDEZ'
+            },
+            'free': {
+                totalEntries: '1 bonus entry',
+                ticketNumbers: '1 unique 9-digit ticket number',
+                paymentAmount: 'Free',
+                paymentStatus: 'No payment required - Entry confirmed',
+                venmoNote: null
+            }
+        };
+        
+        return entryTypes[entryType] || entryTypes['free'];
+    }
+
+    // Update confirmation section based on entry type
+    function updateConfirmationSection(entryType) {
+        const details = getEntryDetails(entryType);
+        const paymentInstructions = document.querySelector('.payment-instructions');
+        
+        if (entryType === 'free') {
+            // Free entry - no payment needed
+            paymentInstructions.innerHTML = `
+                <p><strong>Entry Confirmed!</strong></p>
+                <p>You have been entered with <strong>${details.totalEntries}</strong> in the drawing.</p>
+                <p class="ticket-info">You will receive <strong>${details.ticketNumbers}</strong> via email within 24 hours.</p>
+                <p class="payment-note"><em>No payment required. Your free bonus entry is confirmed and you're eligible for the September 30th drawing.</em></p>
+            `;
+        } else {
+            // Paid entry - show payment instructions
+            paymentInstructions.innerHTML = `
+                <p>To complete your entry and receive <strong>${details.totalEntries}</strong>, please send <strong>${details.paymentAmount}</strong> via Venmo:</p>
+                <div class="venmo-info">
+                    <strong>@BOURBONDUDEZ</strong>
+                    <div class="qr-code-container">
+                        <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="venmo-qr-code">
+                        <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
+                    </div>
+                    <a href="https://venmo.com/BOURBONDUDEZ" class="venmo-btn" target="_blank" rel="noopener noreferrer">
+                        Pay ${details.paymentAmount} on Venmo
+                    </a>
+                </div>
+                <p class="ticket-info">After payment, you will receive <strong>${details.ticketNumbers}</strong> via email within 24 hours.</p>
+                <p class="payment-note"><em>Payment must be completed to receive your full ${details.totalEntries}. Your 1 bonus entry is already confirmed.</em></p>
+            `;
+        }
+    }
+
     // Main sweepstakes form
     const sweepstakesForm = document.getElementById('sweepstakes-form');
     const confirmationSection = document.getElementById('confirmation');
@@ -250,14 +326,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Collect form data
             const formData = new FormData(sweepstakesForm);
+            const selectedEntryType = formData.get('entryType');
+            
+            // Determine entry details based on selection
+            const entryDetails = getEntryDetails(selectedEntryType);
             
             // Add additional data for Formspree
             formData.append('_subject', 'New Sweepstakes Entry - Bettinardi x Eagle Rare Putter');
             formData.append('_replyto', formData.get('email'));
             formData.append('_next', window.location.href + '#success');
             formData.append('submissionTime', new Date().toLocaleString());
-            formData.append('entryType', 'Free Entry (1 chance)');
-            formData.append('paymentStatus', 'Pending - Monitor @BOURBONDUDEZ Venmo for $25 payment');
+            formData.append('totalEntries', entryDetails.totalEntries);
+            formData.append('paymentAmount', entryDetails.paymentAmount);
+            formData.append('paymentStatus', entryDetails.paymentStatus);
 
             try {
                 // Submit to Formspree
@@ -270,6 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
+                    // Update confirmation section based on entry type
+                    updateConfirmationSection(selectedEntryType);
+                    
                     // Hide form and show confirmation
                     sweepstakesForm.style.display = 'none';
                     confirmationSection.style.display = 'block';
@@ -284,6 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         fullName: formData.get('fullName'),
                         email: formData.get('email'),
                         hearAbout: formData.get('hearAbout'),
+                        entryType: selectedEntryType,
+                        totalEntries: entryDetails.totalEntries,
+                        paymentAmount: entryDetails.paymentAmount,
                         timestamp: new Date().toISOString()
                     });
                     
@@ -550,6 +637,174 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // Terms & Conditions Modal functionality
+    const termsModal = document.getElementById('terms-modal');
+    const termsLink = document.getElementById('terms-link'); // Form terms link
+    const infoTermsLink = document.getElementById('info-terms-link'); // Info terms link
+    const termsCheckbox = document.getElementById('terms');
+    const termsStatus = document.getElementById('terms-status');
+    const acceptTermsBtn = document.getElementById('accept-terms');
+    const modalCloseButtons = document.querySelectorAll('.modal-close');
+    const modalFooter = document.getElementById('modal-footer');
+    const modalFooterInfo = document.getElementById('modal-footer-info');
+    
+    let termsAccepted = false;
+    let modalContext = 'form'; // 'form' or 'info'
+
+    // Open modal when form Terms & Conditions link is clicked (requires acceptance)
+    if (termsLink) {
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalContext = 'form';
+            openTermsModal();
+        });
+    }
+
+    // Open modal when info Terms & Conditions link is clicked (info only)
+    if (infoTermsLink) {
+        infoTermsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalContext = 'info';
+            openTermsModal();
+        });
+    }
+
+    // Close modal functionality
+    modalCloseButtons.forEach(button => {
+        button.addEventListener('click', closeTermsModal);
+    });
+
+    // Close modal when clicking outside
+    if (termsModal) {
+        termsModal.addEventListener('click', (e) => {
+            if (e.target === termsModal) {
+                closeTermsModal();
+            }
+        });
+    }
+
+    // Accept terms functionality
+    if (acceptTermsBtn) {
+        acceptTermsBtn.addEventListener('click', () => {
+            termsAccepted = true;
+            termsCheckbox.disabled = false;
+            termsCheckbox.checked = true;
+            termsStatus.textContent = 'Terms & Conditions accepted - You may now enter the sweepstakes';
+            termsStatus.classList.add('terms-accepted');
+            closeTermsModal();
+            
+            // Trigger change event for validation
+            termsCheckbox.dispatchEvent(new Event('change'));
+        });
+    }
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && termsModal.style.display === 'flex') {
+            closeTermsModal();
+        }
+    });
+
+    function openTermsModal() {
+        termsModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Show appropriate footer based on context
+        if (modalContext === 'form') {
+            modalFooter.style.display = 'flex';
+            modalFooterInfo.style.display = 'none';
+        } else {
+            modalFooter.style.display = 'none';
+            modalFooterInfo.style.display = 'flex';
+        }
+        
+        // Focus on the modal for screen readers
+        const modalContent = termsModal.querySelector('.modal-content');
+        modalContent.focus();
+        
+        // Trap focus within modal
+        trapFocus(modalContent);
+    }
+
+    function closeTermsModal() {
+        termsModal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Return focus to the appropriate link based on context
+        if (modalContext === 'form' && termsLink) {
+            termsLink.focus();
+        } else if (modalContext === 'info' && infoTermsLink) {
+            infoTermsLink.focus();
+        }
+    }
+
+    // Enhanced form validation to check if terms are accepted
+    const originalValidateField = window.validateField || validateField;
+    
+    // Update the validateField function to handle terms requirement
+    function validateFieldWithTerms(field) {
+        if (field.name === 'terms') {
+            const errorElement = document.getElementById('terms-error');
+            
+            if (!termsAccepted || !field.checked) {
+                errorElement.textContent = 'You must read and accept the Terms & Conditions before entering.';
+                field.classList.add('error');
+                return false;
+            } else {
+                errorElement.textContent = '';
+                field.classList.remove('error');
+                return true;
+            }
+        }
+        
+        // For other fields, use the original validation logic
+        return originalValidateField ? originalValidateField(field) : validateField(field);
+    }
+
+    // Override the validateField function
+    if (typeof validateField !== 'undefined') {
+        const originalFunction = validateField;
+        validateField = function(field) {
+            if (field.name === 'terms') {
+                return validateFieldWithTerms(field);
+            }
+            return originalFunction(field);
+        };
+    }
+
+    // Prevent form submission if terms not accepted
+    if (sweepstakesForm) {
+        sweepstakesForm.addEventListener('submit', (e) => {
+            if (!termsAccepted || !termsCheckbox.checked) {
+                e.preventDefault();
+                const termsError = document.getElementById('terms-error');
+                termsError.textContent = 'You must read and accept the Terms & Conditions before entering.';
+                termsCheckbox.classList.add('error');
+                
+                // Scroll to and focus on terms section
+                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                termsLink.focus();
+                
+                return false;
+            }
+        });
+    }
+
+    // Add responsive modal behavior
+    function handleModalResize() {
+        if (termsModal && termsModal.style.display === 'flex') {
+            const modalContent = termsModal.querySelector('.modal-content');
+            const windowHeight = window.innerHeight;
+            const modalHeight = modalContent.offsetHeight;
+            
+            if (modalHeight > windowHeight * 0.9) {
+                modalContent.style.maxHeight = '90vh';
+            }
+        }
+    }
+
+    window.addEventListener('resize', handleModalResize);
 
     console.log('Sweepstakes page initialized successfully');
 });
