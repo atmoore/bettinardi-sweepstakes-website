@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize EmailJS
+    emailjs.init("549w3Q_mmquktWtJd"); // EmailJS public key
     // Form validation patterns
     const validationPatterns = {
         // More comprehensive email validation
@@ -422,6 +424,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
+                    // Send autoresponse email via EmailJS
+                    const autoresponseSuccess = await sendAutoresponse(
+                        formData.get('email'),
+                        formData.get('fullName'),
+                        selectedEntryType,
+                        entryDetails
+                    );
+
+                    if (!autoresponseSuccess) {
+                        console.warn('Autoresponse email failed to send, but form submission was successful');
+                    }
+
                     // Update confirmation section based on entry type
                     updateConfirmationSection(selectedEntryType);
                     
@@ -457,6 +471,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+
+    // EmailJS autoresponse function
+    async function sendAutoresponse(userEmail, userName, entryType, entryDetails) {
+        const emailParams = {
+            to_email: userEmail,
+            to_name: userName,
+            entry_type: entryType === 'free' ? 'Free Entry' : `Paid Entry (${entryDetails.paymentAmount})`,
+            total_entries: entryDetails.totalEntries,
+            payment_amount: entryDetails.paymentAmount,
+            payment_status: entryDetails.paymentStatus,
+            drawing_date: 'September 30th, 2025',
+            company_name: 'Bourbon Dudez LLC',
+            company_email: 'bourborndudezsweepstakes@gmail.com'
+        };
+
+        try {
+            const response = await emailjs.send(
+                'service_ld8ahu9', // EmailJS service ID
+                'template_5d64ia9', // EmailJS template ID
+                emailParams
+            );
+            console.log('Autoresponse sent successfully:', response);
+            return true;
+        } catch (error) {
+            console.error('Failed to send autoresponse:', error);
+            return false;
+        }
+    }
 
     // Analytics tracking (placeholder)
     function trackFormSubmission(data) {
