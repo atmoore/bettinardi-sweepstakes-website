@@ -311,17 +311,41 @@
                 <div class="confirmation-section" id="confirmation" style="display: none;" role="region" aria-labelledby="confirmation-heading">
                     <h3 id="confirmation-heading">Entry Submitted Successfully!</h3>
                     <div class="payment-instructions">
-                        <p>To complete your entry and receive 10 entries instead of 1, please send $25 via Venmo to:</p>
-                        <div class="venmo-info">
-                            <strong>@BOURBONDUDEZ</strong>
-                            <div class="qr-code-container">
-                                <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay $25 for 10 sweepstakes entries" class="venmo-qr-code">
-                                <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
+                        <p>To complete your entry and receive 10 entries instead of 1, please send $25 via Venmo or Zelle:</p>
+                        
+                        <!-- Payment Options Container -->
+                        <div class="payment-options">
+                            <!-- Venmo Option -->
+                            <div class="payment-option venmo-info">
+                                <h4 class="payment-title">Pay with Venmo</h4>
+                                <strong>@BOURBONDUDEZ</strong>
+                                <div class="qr-code-container">
+                                    <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay $25 for 10 sweepstakes entries" class="payment-qr-code">
+                                    <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
+                                </div>
+                                <a href="https://venmo.com/BOURBONDUDEZ" class="payment-btn venmo-btn" target="_blank" rel="noopener noreferrer">
+                                    Pay Now on Venmo
+                                </a>
                             </div>
-                            <a href="https://venmo.com/BOURBONDUDEZ" class="venmo-btn" target="_blank" rel="noopener noreferrer">
-                                Pay Now on Venmo
-                            </a>
+
+                            <!-- OR Divider -->
+                            <div class="payment-divider">
+                                <span>OR</span>
+                            </div>
+                            
+                            <!-- Zelle Option -->
+                            <div class="payment-option zelle-info">
+                                <h4 class="payment-title">Pay with Zelle</h4>
+                                <div class="qr-code-container">
+                                    <img src="zelle.HEIC" alt="Zelle QR Code - Scan to pay $25 for 10 sweepstakes entries" class="payment-qr-code">
+                                    <p class="qr-instruction">Scan QR code with your phone's camera or banking app</p>
+                                </div>
+                                <div class="zelle-signin-option">
+                                    <p class="signin-text">Or sign in to your banking app and send to our Zelle account</p>
+                                </div>
+                            </div>
                         </div>
+                        
                         <p class="payment-note"><em>Payment is optional. Free entries receive 1 chance, paid entries receive 10 chances.</em></p>
                     </div>
                 </div>
