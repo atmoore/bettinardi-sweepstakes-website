@@ -739,6 +739,23 @@ section {
     transform: translateY(-1px);
 }
 
+.zelle-btn {
+    display: inline-block;
+    background: #6534D1;
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    margin-top: var(--spacing-sm);
+    font-weight: 600;
+    transition: var(--transition-normal);
+}
+
+.zelle-btn:hover {
+    background: #5429B8;
+    transform: translateY(-1px);
+}
+
 .payment-note {
     margin-top: var(--spacing-md);
     opacity: 0.9;

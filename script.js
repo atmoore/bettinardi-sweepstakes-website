@@ -186,8 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return entryTypes[entryType] || entryTypes['free'];
     }
 
-    // Update confirmation section based on entry type
-    function updateConfirmationSection(entryType) {
+    // Update confirmation section based on entry type and payment method
+    function updateConfirmationSection(entryType, paymentMethod) {
         const details = getEntryDetails(entryType);
         const paymentInstructions = document.querySelector('.payment-instructions');
         
@@ -200,19 +200,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="payment-note"><em>No payment required. Your free bonus entry is confirmed and you're eligible for the September 30th drawing.</em></p>
             `;
         } else {
-            // Paid entry - show payment instructions
+            // Paid entry - show payment instructions for selected method
+            const paymentMethodText = paymentMethod === 'venmo' ? 'Venmo' : 'Zelle';
+            
             paymentInstructions.innerHTML = `
-                <p>To complete your entry and receive <strong>${details.totalEntries}</strong>, please send <strong>${details.paymentAmount}</strong> via Venmo:</p>
-                <div class="venmo-info">
-                    <strong>@BOURBONDUDEZ</strong>
-                    <div class="qr-code-container">
-                        <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="venmo-qr-code">
-                        <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
+                <p>To complete your entry and receive <strong>${details.totalEntries}</strong>, please send <strong>${details.paymentAmount}</strong> via ${paymentMethodText}:</p>
+                ${paymentMethod === 'venmo' ? `
+                    <div class="venmo-info">
+                        <strong>@BOURBONDUDEZ</strong>
+                        <div class="qr-code-container">
+                            <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="venmo-qr-code">
+                            <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
+                        </div>
+                        <a href="https://venmo.com/BOURBONDUDEZ" class="venmo-btn" target="_blank" rel="noopener noreferrer">
+                            Pay ${details.paymentAmount} on Venmo
+                        </a>
                     </div>
-                    <a href="https://venmo.com/BOURBONDUDEZ" class="venmo-btn" target="_blank" rel="noopener noreferrer">
-                        Pay ${details.paymentAmount} on Venmo
-                    </a>
-                </div>
+                ` : `
+                    <div class="venmo-info">
+                        <strong>Zelle Payment</strong>
+                        <div class="qr-code-container">
+                            <img src="zelle_QR.png" alt="Zelle QR Code - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="venmo-qr-code">
+                            <p class="qr-instruction">Scan QR code with your phone's camera or Zelle app</p>
+                        </div>
+                        <a href="https://www.zellepay.com/" class="zelle-btn" target="_blank" rel="noopener noreferrer">
+                            Pay ${details.paymentAmount} with Zelle
+                        </a>
+                    </div>
+                `}
                 <p class="ticket-info">After payment, you will receive <strong>${details.ticketNumbers}</strong> via email within 24 hours.</p>
                 <p class="payment-note"><em>Payment must be completed to receive your full ${details.totalEntries}. Your 1 bonus entry is already confirmed.</em></p>
             `;
@@ -249,6 +264,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmationSection = document.getElementById('confirmation');
 
     if (sweepstakesForm) {
+        // Initialize payment method field visibility
+        const paymentMethodGroup = document.getElementById('paymentMethodGroup');
+        const paymentMethodField = document.getElementById('paymentMethod');
+        if (paymentMethodGroup && paymentMethodField) {
+            paymentMethodGroup.style.display = 'block'; // Show by default for testing
+            console.log('Payment method field initialized and visible');
+        } else {
+            console.error('Payment method elements not found');
+        }
         // Form validation function
         function validateField(field) {
             const fieldName = field.name;
@@ -296,6 +320,11 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (fieldName === 'terms' && field.type === 'checkbox' && !field.checked) {
                 isValid = false;
                 errorMessage = errorMessages.terms;
+            }
+            // Payment method validation
+            else if (fieldName === 'paymentMethod' && field.required && !fieldValue) {
+                isValid = false;
+                errorMessage = 'Please select a payment method.';
             }
 
             if (!isValid) {
@@ -358,6 +387,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const emailField = sweepstakesForm.querySelector('input[name="email"]');
                 if (emailField && emailField.value) {
                     checkAndDisplayDuplicateWarning(emailField.value, e.target);
+                }
+            }
+            
+            // Show/hide payment method field based on entry type
+            if (e.target.name === 'entryType') {
+                const paymentMethodGroup = document.getElementById('paymentMethodGroup');
+                const paymentMethodField = document.getElementById('paymentMethod');
+                
+                if (e.target.value === 'free') {
+                    paymentMethodGroup.style.display = 'none';
+                    paymentMethodField.removeAttribute('required');
+                    paymentMethodField.value = '';
+                } else if (e.target.value.startsWith('paid-')) {
+                    paymentMethodGroup.style.display = 'block';
+                    paymentMethodField.setAttribute('required', 'required');
+                } else {
+                    paymentMethodGroup.style.display = 'none';
+                    paymentMethodField.removeAttribute('required');
+                    paymentMethodField.value = '';
                 }
             }
         });
@@ -461,19 +509,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (submissionSuccess) {
                     // Send autoresponse email via EmailJS
+                    const selectedPaymentMethod = formData.get('paymentMethod');
                     const autoresponseSuccess = await sendAutoresponse(
                         formData.get('email'),
                         formData.get('fullName'),
                         selectedEntryType,
-                        entryDetails
+                        entryDetails,
+                        selectedPaymentMethod
                     );
 
                     if (!autoresponseSuccess) {
                         console.warn('Autoresponse email failed to send, but form submission was successful');
                     }
 
-                    // Update confirmation section based on entry type
-                    updateConfirmationSection(selectedEntryType);
+                    // Update confirmation section based on entry type and payment method
+                    updateConfirmationSection(selectedEntryType, selectedPaymentMethod);
                     
                     // Hide form and show confirmation
                     sweepstakesForm.style.display = 'none';
@@ -506,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // EmailJS autoresponse function  
-    async function sendAutoresponse(userEmail, userName, entryType, entryDetails) {
+    async function sendAutoresponse(userEmail, userName, entryType, entryDetails, paymentMethod) {
         console.log('EmailJS: Starting autoresponse function');
         console.log('EmailJS: User email:', userEmail);
         console.log('EmailJS: User name:', userName);
@@ -526,6 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
             total_entries: entryDetails.totalEntries,
             payment_amount: entryDetails.paymentAmount,
             payment_status: entryDetails.paymentStatus,
+            payment_method: paymentMethod || 'N/A',  // Form field: name="paymentMethod"
+            preferred_payment: paymentMethod ? (paymentMethod === 'venmo' ? 'Venmo' : 'Zelle') : 'N/A',
             
             // Static info
             drawing_date: 'September 30th, 2025',

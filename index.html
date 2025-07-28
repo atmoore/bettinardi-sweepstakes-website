@@ -270,6 +270,17 @@
                         </select>
                     </div>
 
+                    <div class="form-group" id="paymentMethodGroup">
+                        <label for="paymentMethod" class="form-label">Preferred Payment Method <span class="required" aria-label="required">*</span></label>
+                        <div class="entry-note">Select your preferred payment method for paid entries</div>
+                        <select id="paymentMethod" name="paymentMethod" class="form-select" aria-describedby="paymentMethod-error">
+                            <option value="">Select payment method</option>
+                            <option value="venmo">Venmo</option>
+                            <option value="zelle">Zelle</option>
+                        </select>
+                        <div class="error-message" id="paymentMethod-error" role="alert" aria-live="polite"></div>
+                    </div>
+
                     <div class="form-group">
                         <label for="email" class="form-label">Email Address <span class="required" aria-label="required">*</span></label>
                         <input type="email" id="email" name="email" class="form-input" required aria-describedby="email-error" placeholder="your.email@example.com">
