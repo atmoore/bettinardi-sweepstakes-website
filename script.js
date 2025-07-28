@@ -408,25 +408,58 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('_subject', 'New Sweepstakes Entry - Bettinardi x Eagle Rare Putter');
             formData.append('_replyto', formData.get('email'));
             formData.append('_next', window.location.href + '#success');
-            formData.append('_stripe', 'false');
-            formData.append('_payment', 'false');
             formData.append('submissionTime', new Date().toLocaleString());
             formData.append('totalEntries', entryDetails.totalEntries);
             formData.append('paymentAmount', entryDetails.paymentAmount);
             formData.append('paymentStatus', entryDetails.paymentStatus);
 
             try {
-                // Submit to Formspree with explicit no-Stripe headers
-                const response = await fetch(sweepstakesForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Formspree-Disable-Stripe': 'true'
-                    }
-                });
+                // Try fetch first, fallback to traditional form submission
+                let submissionSuccess = false;
+                
+                try {
+                    // Submit to Formspree with minimal headers to avoid CORS issues
+                    const response = await fetch(sweepstakesForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
 
-                if (response.ok) {
+                    if (response.ok) {
+                        submissionSuccess = true;
+                    } else {
+                        const errorData = await response.text();
+                        console.warn('Fetch failed, trying traditional submission:', errorData);
+                        throw new Error('Fetch submission failed');
+                    }
+                } catch (fetchError) {
+                    console.warn('Fetch method failed, using traditional form submission:', fetchError);
+                    
+                    // Fallback: Use traditional form submission
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.name = 'form-submission-frame';
+                    document.body.appendChild(iframe);
+                    
+                    const originalTarget = sweepstakesForm.target;
+                    sweepstakesForm.target = 'form-submission-frame';
+                    
+                    // Submit form traditionally
+                    sweepstakesForm.submit();
+                    
+                    // Wait a bit for submission
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // Clean up
+                    document.body.removeChild(iframe);
+                    sweepstakesForm.target = originalTarget;
+                    
+                    submissionSuccess = true;
+                }
+
+                if (submissionSuccess) {
                     // Send autoresponse email via EmailJS
                     const autoresponseSuccess = await sendAutoresponse(
                         formData.get('email'),
@@ -461,14 +494,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         paymentAmount: entryDetails.paymentAmount,
                         timestamp: new Date().toISOString()
                     });
-                    
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Submission failed');
                 }
+                    
             } catch (error) {
                 console.error('Form submission error:', error);
-                alert('There was an error submitting your entry. Please try again.');
+                alert('There was an error submitting your entry. Please try again or contact us directly at bourborndudezsweepstakes@gmail.com');
             }
         });
     }
