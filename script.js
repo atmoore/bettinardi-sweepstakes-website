@@ -217,6 +217,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to check for duplicate free entries
+    function checkDuplicateFreeEntry(email) {
+        if (!email) return false;
+        const FREE_ENTRIES_KEY = 'sweepstakes-free-entries';
+        const existingFreeEntries = JSON.parse(localStorage.getItem(FREE_ENTRIES_KEY) || '[]');
+        return existingFreeEntries.includes(email.trim().toLowerCase());
+    }
+
+    // Function to check and display duplicate warning
+    function checkAndDisplayDuplicateWarning(email, entryTypeField) {
+        if (checkDuplicateFreeEntry(email)) {
+            const errorElement = document.getElementById('entryType-error');
+            errorElement.textContent = 'This email address has already been used for a free entry. Only one free entry per person is allowed.';
+            entryTypeField.classList.add('error');
+            return true;
+        } else {
+            const errorElement = document.getElementById('entryType-error');
+            if (errorElement.textContent.includes('already been used for a free entry')) {
+                errorElement.textContent = '';
+                entryTypeField.classList.remove('error');
+            }
+            return false;
+        }
+    }
+
     // Main sweepstakes form
     const sweepstakesForm = document.getElementById('sweepstakes-form');
     const confirmationSection = document.getElementById('confirmation');
@@ -292,6 +317,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            // Additional validation for free entry duplicates
+            const entryTypeField = sweepstakesForm.querySelector('select[name="entryType"]');
+            const emailField = sweepstakesForm.querySelector('input[name="email"]');
+            
+            if (entryTypeField && emailField && entryTypeField.value === 'free') {
+                if (checkAndDisplayDuplicateWarning(emailField.value, entryTypeField)) {
+                    isFormValid = false;
+                }
+            }
+
             return isFormValid;
         }
 
@@ -299,13 +334,29 @@ document.addEventListener('DOMContentLoaded', () => {
         sweepstakesForm.addEventListener('blur', (e) => {
             if (e.target.matches('input, select, textarea')) {
                 validateField(e.target);
+                
+                // Check for duplicate free entries when email field loses focus
+                if (e.target.name === 'email') {
+                    const entryTypeField = sweepstakesForm.querySelector('select[name="entryType"]');
+                    if (entryTypeField && entryTypeField.value === 'free') {
+                        checkAndDisplayDuplicateWarning(e.target.value, entryTypeField);
+                    }
+                }
             }
         }, true);
 
-        // Real-time validation for checkboxes on change
+        // Real-time validation for checkboxes and entry type changes
         sweepstakesForm.addEventListener('change', (e) => {
             if (e.target.type === 'checkbox') {
                 validateField(e.target);
+            }
+            
+            // Check for duplicate free entries when entry type changes
+            if (e.target.name === 'entryType' && e.target.value === 'free') {
+                const emailField = sweepstakesForm.querySelector('input[name="email"]');
+                if (emailField && emailField.value) {
+                    checkAndDisplayDuplicateWarning(emailField.value, e.target);
+                }
             }
         });
 
@@ -327,6 +378,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // Collect form data
             const formData = new FormData(sweepstakesForm);
             const selectedEntryType = formData.get('entryType');
+            const userEmail = formData.get('email').trim().toLowerCase();
+
+            // Check for duplicate free entries
+            if (selectedEntryType === 'free') {
+                const FREE_ENTRIES_KEY = 'sweepstakes-free-entries';
+                const existingFreeEntries = JSON.parse(localStorage.getItem(FREE_ENTRIES_KEY) || '[]');
+                
+                if (existingFreeEntries.includes(userEmail)) {
+                    // Show error message and scroll to entry type field
+                    const entryTypeField = sweepstakesForm.querySelector('select[name="entryType"]');
+                    checkAndDisplayDuplicateWarning(userEmail, entryTypeField);
+                    entryTypeField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    entryTypeField.focus();
+                    return;
+                }
+                
+                // Add email to free entries list
+                existingFreeEntries.push(userEmail);
+                localStorage.setItem(FREE_ENTRIES_KEY, JSON.stringify(existingFreeEntries));
+            }
             
             // Determine entry details based on selection
             const entryDetails = getEntryDetails(selectedEntryType);
