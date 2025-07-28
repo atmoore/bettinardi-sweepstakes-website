@@ -200,43 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="payment-note"><em>No payment required. Your free bonus entry is confirmed and you're eligible for the September 30th drawing.</em></p>
             `;
         } else {
-            // Paid entry - show payment instructions with both Venmo and Zelle options
+            // Paid entry - show payment instructions
             paymentInstructions.innerHTML = `
-                <p>To complete your entry and receive <strong>${details.totalEntries}</strong>, please send <strong>${details.paymentAmount}</strong> via Venmo or Zelle:</p>
-                
-                <!-- Payment Options Container -->
-                <div class="payment-options">
-                    <!-- Venmo Option -->
-                    <div class="payment-option venmo-info">
-                        <h4 class="payment-title">Pay with Venmo</h4>
-                        <strong>@BOURBONDUDEZ</strong>
-                        <div class="qr-code-container">
-                            <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="payment-qr-code">
-                            <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
-                        </div>
-                        <a href="https://venmo.com/BOURBONDUDEZ" class="payment-btn venmo-btn" target="_blank" rel="noopener noreferrer">
-                            Pay ${details.paymentAmount} on Venmo
-                        </a>
+                <p>To complete your entry and receive <strong>${details.totalEntries}</strong>, please send <strong>${details.paymentAmount}</strong> via Venmo:</p>
+                <div class="venmo-info">
+                    <strong>@BOURBONDUDEZ</strong>
+                    <div class="qr-code-container">
+                        <img src="venmo-qr-clean.png" alt="Venmo QR Code for @BourbonDudez - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="venmo-qr-code">
+                        <p class="qr-instruction">Scan QR code with your phone's camera or Venmo app</p>
                     </div>
-
-                    <!-- OR Divider -->
-                    <div class="payment-divider">
-                        <span>OR</span>
-                    </div>
-                    
-                    <!-- Zelle Option -->
-                    <div class="payment-option zelle-info">
-                        <h4 class="payment-title">Pay with Zelle</h4>
-                        <div class="qr-code-container">
-                            <img src="zelle.HEIC" alt="Zelle QR Code - Scan to pay ${details.paymentAmount} for sweepstakes entries" class="payment-qr-code">
-                            <p class="qr-instruction">Scan QR code with your phone's camera or banking app</p>
-                        </div>
-                        <div class="zelle-signin-option">
-                            <p class="signin-text">Or sign in to your banking app and send to our Zelle account</p>
-                        </div>
-                    </div>
+                    <a href="https://venmo.com/BOURBONDUDEZ" class="venmo-btn" target="_blank" rel="noopener noreferrer">
+                        Pay ${details.paymentAmount} on Venmo
+                    </a>
                 </div>
-                
                 <p class="ticket-info">After payment, you will receive <strong>${details.ticketNumbers}</strong> via email within 24 hours.</p>
                 <p class="payment-note"><em>Payment must be completed to receive your full ${details.totalEntries}. Your 1 bonus entry is already confirmed.</em></p>
             `;
@@ -386,28 +362,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Consolidated form submission handler
+        // Form submission handler
         sweepstakesForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log('Form submission started');
-
-            // Check if terms are accepted first
-            if (!termsAccepted || !termsCheckbox.checked) {
-                console.log('Terms not accepted, preventing submission');
-                const termsError = document.getElementById('terms-error');
-                termsError.textContent = 'You must read and accept the Terms & Conditions before entering.';
-                termsCheckbox.classList.add('error');
-                
-                // Scroll to and focus on terms section
-                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                termsLink.focus();
-                return;
-            }
 
             // Validate entire form
-            console.log('Validating form...');
             if (!validateForm()) {
-                console.log('Form validation failed');
                 // Focus on first error field
                 const firstError = sweepstakesForm.querySelector('.error');
                 if (firstError) {
@@ -416,7 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return;
             }
-            console.log('Form validation passed');
 
             // Collect form data
             const formData = new FormData(sweepstakesForm);
@@ -456,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Submit to Formspree
-                console.log('Submitting to Formspree:', sweepstakesForm.action);
                 const response = await fetch(sweepstakesForm.action, {
                     method: 'POST',
                     body: formData,
@@ -466,10 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    // Clear saved form data on successful submission
-                    const FORM_DATA_KEY = 'sweepstakes-form-data';
-                    localStorage.removeItem(FORM_DATA_KEY);
-
                     // Send autoresponse email via EmailJS
                     const autoresponseSuccess = await sendAutoresponse(
                         formData.get('email'),
@@ -511,29 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Form submission error:', error);
-                
-                // More specific error messages
-                let errorMessage = 'There was an error submitting your entry. Please try again.';
-                
-                if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Network error. Please check your internet connection and try again.';
-                } else if (error.message.includes('Submission failed')) {
-                    errorMessage = 'Form submission failed. Please check all fields and try again.';
-                } else if (error.message.includes('validation')) {
-                    errorMessage = 'Please check that all required fields are filled out correctly.';
-                }
-                
-                // Show error message
-                alert(errorMessage);
-                
-                // Log detailed error information for debugging
-                console.log('Detailed error info:', {
-                    error: error,
-                    message: error.message,
-                    stack: error.stack,
-                    formAction: sweepstakesForm.action,
-                    formMethod: sweepstakesForm.method
-                });
+                alert('There was an error submitting your entry. Please try again.');
             }
         });
     }
@@ -863,7 +795,12 @@ The Bourbon Dudez LLC Team`
             localStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
         });
 
-        // Note: Form data clearing is now handled in the main submit handler
+        // Clear saved data on successful submission
+        sweepstakesForm.addEventListener('submit', (e) => {
+            if (!e.defaultPrevented) {
+                localStorage.removeItem(FORM_DATA_KEY);
+            }
+        });
     }
 
     // Image/Video gallery functionality
@@ -950,15 +887,6 @@ The Bourbon Dudez LLC Team`
     
     let termsAccepted = false;
     let modalContext = 'form'; // 'form' or 'info'
-    
-    // Debug logging for terms elements
-    console.log('Terms elements found:', {
-        termsModal: !!termsModal,
-        termsLink: !!termsLink,
-        termsCheckbox: !!termsCheckbox,
-        termsStatus: !!termsStatus,
-        acceptTermsBtn: !!acceptTermsBtn
-    });
 
     // Open modal when form Terms & Conditions link is clicked (requires acceptance)
     if (termsLink) {
@@ -1081,7 +1009,23 @@ The Bourbon Dudez LLC Team`
         };
     }
 
-    // Note: Terms validation is now handled in the main submit handler
+    // Prevent form submission if terms not accepted
+    if (sweepstakesForm) {
+        sweepstakesForm.addEventListener('submit', (e) => {
+            if (!termsAccepted || !termsCheckbox.checked) {
+                e.preventDefault();
+                const termsError = document.getElementById('terms-error');
+                termsError.textContent = 'You must read and accept the Terms & Conditions before entering.';
+                termsCheckbox.classList.add('error');
+                
+                // Scroll to and focus on terms section
+                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                termsLink.focus();
+                
+                return false;
+            }
+        });
+    }
 
     // Add responsive modal behavior
     function handleModalResize() {
