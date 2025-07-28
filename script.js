@@ -408,18 +408,21 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('_subject', 'New Sweepstakes Entry - Bettinardi x Eagle Rare Putter');
             formData.append('_replyto', formData.get('email'));
             formData.append('_next', window.location.href + '#success');
+            formData.append('_stripe', 'false');
+            formData.append('_payment', 'false');
             formData.append('submissionTime', new Date().toLocaleString());
             formData.append('totalEntries', entryDetails.totalEntries);
             formData.append('paymentAmount', entryDetails.paymentAmount);
             formData.append('paymentStatus', entryDetails.paymentStatus);
 
             try {
-                // Submit to Formspree
+                // Submit to Formspree with explicit no-Stripe headers
                 const response = await fetch(sweepstakesForm.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Formspree-Disable-Stripe': 'true'
                     }
                 });
 
