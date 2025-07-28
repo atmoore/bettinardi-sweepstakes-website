@@ -504,7 +504,22 @@ document.addEventListener('DOMContentLoaded', () => {
             prize_value: '$1,250'
         };
 
-        console.log('EmailJS: Email parameters:', emailParams);
+        console.log('EmailJS: Raw inputs:');
+        console.log('- userEmail:', userEmail);
+        console.log('- userName:', userName);
+        console.log('- entryType:', entryType);
+        console.log('- entryDetails:', entryDetails);
+        
+        console.log('EmailJS: Final emailParams object:');
+        console.log(JSON.stringify(emailParams, null, 2));
+        
+        console.log('EmailJS: Key variables:');
+        console.log('name =', emailParams.name);
+        console.log('entry_type =', emailParams.entry_type);
+        console.log('total_entries =', emailParams.total_entries);
+        console.log('payment_amount =', emailParams.payment_amount);
+        console.log('drawing_date =', emailParams.drawing_date);
+        console.log('company_name =', emailParams.company_name);
 
         try {
             console.log('EmailJS: Attempting to send email...');
