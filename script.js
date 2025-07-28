@@ -386,12 +386,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Form submission handler
+        // Consolidated form submission handler
         sweepstakesForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Form submission started');
+
+            // Check if terms are accepted first
+            if (!termsAccepted || !termsCheckbox.checked) {
+                console.log('Terms not accepted, preventing submission');
+                const termsError = document.getElementById('terms-error');
+                termsError.textContent = 'You must read and accept the Terms & Conditions before entering.';
+                termsCheckbox.classList.add('error');
+                
+                // Scroll to and focus on terms section
+                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                termsLink.focus();
+                return;
+            }
 
             // Validate entire form
+            console.log('Validating form...');
             if (!validateForm()) {
+                console.log('Form validation failed');
                 // Focus on first error field
                 const firstError = sweepstakesForm.querySelector('.error');
                 if (firstError) {
@@ -400,6 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return;
             }
+            console.log('Form validation passed');
 
             // Collect form data
             const formData = new FormData(sweepstakesForm);
@@ -439,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Submit to Formspree
+                console.log('Submitting to Formspree:', sweepstakesForm.action);
                 const response = await fetch(sweepstakesForm.action, {
                     method: 'POST',
                     body: formData,
@@ -448,6 +466,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
+                    // Clear saved form data on successful submission
+                    const FORM_DATA_KEY = 'sweepstakes-form-data';
+                    localStorage.removeItem(FORM_DATA_KEY);
+
                     // Send autoresponse email via EmailJS
                     const autoresponseSuccess = await sendAutoresponse(
                         formData.get('email'),
@@ -489,7 +511,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Form submission error:', error);
-                alert('There was an error submitting your entry. Please try again.');
+                
+                // More specific error messages
+                let errorMessage = 'There was an error submitting your entry. Please try again.';
+                
+                if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error. Please check your internet connection and try again.';
+                } else if (error.message.includes('Submission failed')) {
+                    errorMessage = 'Form submission failed. Please check all fields and try again.';
+                } else if (error.message.includes('validation')) {
+                    errorMessage = 'Please check that all required fields are filled out correctly.';
+                }
+                
+                // Show error message
+                alert(errorMessage);
+                
+                // Log detailed error information for debugging
+                console.log('Detailed error info:', {
+                    error: error,
+                    message: error.message,
+                    stack: error.stack,
+                    formAction: sweepstakesForm.action,
+                    formMethod: sweepstakesForm.method
+                });
             }
         });
     }
@@ -819,12 +863,7 @@ The Bourbon Dudez LLC Team`
             localStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
         });
 
-        // Clear saved data on successful submission
-        sweepstakesForm.addEventListener('submit', (e) => {
-            if (!e.defaultPrevented) {
-                localStorage.removeItem(FORM_DATA_KEY);
-            }
-        });
+        // Note: Form data clearing is now handled in the main submit handler
     }
 
     // Image/Video gallery functionality
@@ -911,6 +950,15 @@ The Bourbon Dudez LLC Team`
     
     let termsAccepted = false;
     let modalContext = 'form'; // 'form' or 'info'
+    
+    // Debug logging for terms elements
+    console.log('Terms elements found:', {
+        termsModal: !!termsModal,
+        termsLink: !!termsLink,
+        termsCheckbox: !!termsCheckbox,
+        termsStatus: !!termsStatus,
+        acceptTermsBtn: !!acceptTermsBtn
+    });
 
     // Open modal when form Terms & Conditions link is clicked (requires acceptance)
     if (termsLink) {
@@ -1033,23 +1081,7 @@ The Bourbon Dudez LLC Team`
         };
     }
 
-    // Prevent form submission if terms not accepted
-    if (sweepstakesForm) {
-        sweepstakesForm.addEventListener('submit', (e) => {
-            if (!termsAccepted || !termsCheckbox.checked) {
-                e.preventDefault();
-                const termsError = document.getElementById('terms-error');
-                termsError.textContent = 'You must read and accept the Terms & Conditions before entering.';
-                termsCheckbox.classList.add('error');
-                
-                // Scroll to and focus on terms section
-                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                termsLink.focus();
-                
-                return false;
-            }
-        });
-    }
+    // Note: Terms validation is now handled in the main submit handler
 
     // Add responsive modal behavior
     function handleModalResize() {
