@@ -523,17 +523,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             console.log('EmailJS: Attempting to send email...');
+            
+            // Try sending with explicit options
             const response = await emailjs.send(
                 'service_ld8ahu9', // EmailJS service ID
                 'template_5d64ia9', // EmailJS template ID
-                emailParams
+                emailParams,
+                {
+                    publicKey: '549w3Q_mmquktWtJd',
+                    limitRate: {
+                        id: 'app',
+                        throttle: 10000,
+                    },
+                }
             );
             console.log('EmailJS: Autoresponse sent successfully:', response);
             return true;
         } catch (error) {
             console.error('EmailJS: Failed to send autoresponse:', error);
             console.error('EmailJS: Error details:', error);
-            return false;
+            
+            // Try with simplified parameters using common EmailJS field names
+            try {
+                console.log('EmailJS: Trying with standard EmailJS parameters...');
+                const standardResponse = await emailjs.send(
+                    'service_ld8ahu9',
+                    'template_5d64ia9',
+                    {
+                        to_name: userName,
+                        to_email: userEmail,
+                        from_name: 'Bourbon Dudez LLC',
+                        message: `Hi ${userName},
+
+Congratulations! Your entry for the Bettinardi x Eagle Rare Limited Edition Putter Sweepstakes has been successfully received and confirmed.
+
+YOUR ENTRY DETAILS:
+- Entry Type: ${entryType === 'free' ? 'Free Entry' : `Paid Entry (${entryDetails.paymentAmount})`}
+- Total Entries: ${entryDetails.totalEntries}
+- Payment Amount: ${entryDetails.paymentAmount}
+- Drawing Date: September 30th, 2025
+
+PRIZE INFORMATION:
+Bettinardi x Eagle Rare BB1 Putter - #22 of Only 24 Made
+MSRP: $1,250
+
+WHAT HAPPENS NEXT:
+1. Your unique ticket numbers will be generated and emailed to you within 24 hours
+2. If you selected a paid entry, complete your payment via Venmo to @BOURBONDUDEZ
+3. The live drawing will be held on September 30th, 2025 via Facebook Live
+
+PAYMENT REMINDER:
+If you selected a paid entry option, please complete your payment:
+Send ${entryDetails.paymentAmount} to @BOURBONDUDEZ on Venmo
+Payment confirms your ${entryDetails.totalEntries} for the drawing
+
+QUESTIONS OR NEED HELP?
+Email: bourborndudezsweepstakes@gmail.com
+Phone: 312-202-2150
+Company: Bourbon Dudez LLC
+
+Good luck in the drawing!
+
+Best regards,
+The Bourbon Dudez LLC Team`
+                    }
+                );
+                console.log('EmailJS: Standard method successful:', standardResponse);
+                return true;
+            } catch (standardError) {
+                console.error('EmailJS: Standard method also failed:', standardError);
+                return false;
+            }
         }
     }
 
@@ -743,11 +803,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Image gallery functionality
+    // Image/Video gallery functionality
     const thumbnails = document.querySelectorAll('.thumbnail');
     const mainImage = document.getElementById('main-putter-image');
+    const mainVideo = document.getElementById('main-putter-video');
 
-    if (thumbnails.length > 0 && mainImage) {
+    if (thumbnails.length > 0 && (mainImage || mainVideo)) {
         thumbnails.forEach(thumbnail => {
             thumbnail.addEventListener('click', () => {
                 // Remove active class from all thumbnails
@@ -756,26 +817,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add active class to clicked thumbnail
                 thumbnail.classList.add('active');
                 
-                // Update main image
+                // Check if this is a video or image thumbnail
+                const isVideo = thumbnail.hasAttribute('data-video');
+                const newVideoSrc = thumbnail.dataset.video;
                 const newImageSrc = thumbnail.dataset.image;
-                const newImageAlt = thumbnail.dataset.alt;
+                const newAlt = thumbnail.dataset.alt;
                 
-                // Fade effect for image transition
-                mainImage.style.opacity = '0.5';
-                
-                setTimeout(() => {
-                    mainImage.src = newImageSrc;
-                    mainImage.alt = newImageAlt;
-                    mainImage.style.opacity = '1';
-                }, 150);
-                
-                // Announce change to screen readers
-                const announcement = document.createElement('div');
-                announcement.className = 'sr-only';
-                announcement.setAttribute('aria-live', 'polite');
-                announcement.textContent = `Image changed to: ${newImageAlt}`;
-                document.body.appendChild(announcement);
-                setTimeout(() => announcement.remove(), 1000);
+                if (isVideo && mainVideo && newVideoSrc) {
+                    // Show video, hide image
+                    mainVideo.style.display = 'block';
+                    mainImage.style.display = 'none';
+                    
+                    // Update video source
+                    mainVideo.src = newVideoSrc;
+                    mainVideo.alt = newAlt;
+                    mainVideo.load(); // Reload video with new source
+                    
+                    // Announce change to screen readers
+                    const announcement = document.createElement('div');
+                    announcement.className = 'sr-only';
+                    announcement.setAttribute('aria-live', 'polite');
+                    announcement.textContent = `Video loaded: ${newAlt}`;
+                    document.body.appendChild(announcement);
+                    setTimeout(() => announcement.remove(), 1000);
+                } else if (!isVideo && mainImage && newImageSrc) {
+                    // Show image, hide video
+                    mainImage.style.display = 'block';
+                    mainVideo.style.display = 'none';
+                    
+                    // Fade effect for image transition
+                    mainImage.style.opacity = '0.5';
+                    
+                    setTimeout(() => {
+                        mainImage.src = newImageSrc;
+                        mainImage.alt = newAlt;
+                        mainImage.style.opacity = '1';
+                    }, 150);
+                    
+                    // Announce change to screen readers
+                    const announcement = document.createElement('div');
+                    announcement.className = 'sr-only';
+                    announcement.setAttribute('aria-live', 'polite');
+                    announcement.textContent = `Image changed to: ${newAlt}`;
+                    document.body.appendChild(announcement);
+                    setTimeout(() => announcement.remove(), 1000);
+                }
             });
 
             // Keyboard navigation for thumbnails

@@ -34,10 +34,21 @@
                 <div class="putter-content">
                     <div class="putter-gallery">
                         <div class="main-image">
-                            <img src="putter-front.png" alt="Bettinardi x Eagle Rare Limited Edition Putter #22 of 24, front view showing rose gold PVD finish and Bettinardi branding" class="putter-main-img" id="main-putter-image">
+                            <video src="golf.MOV" alt="Video demonstration of the Bettinardi x Eagle Rare putter in action" class="putter-main-video" id="main-putter-video" controls style="display: block;">
+                                <source src="golf.MOV" type="video/quicktime">
+                                Your browser does not support the video tag.
+                            </video>
+                            <img src="putter-front.png" alt="Bettinardi x Eagle Rare Limited Edition Putter #22 of 24, front view showing rose gold PVD finish and Bettinardi branding" class="putter-main-img" id="main-putter-image" style="display: none;">
                         </div>
                         <div class="thumbnail-gallery">
-                            <button class="thumbnail active" data-image="putter-front.png" data-alt="Front view of Bettinardi x Eagle Rare putter showing rose gold finish and #22 of 24 numbering">
+                            <button class="thumbnail video-thumbnail active" data-video="golf.MOV" data-alt="Video demonstration of the Bettinardi x Eagle Rare putter in action">
+                                <video src="golf.MOV" alt="Thumbnail: Putter video" muted preload="metadata">
+                                    <source src="golf.MOV" type="video/quicktime">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="play-button">▶</div>
+                            </button>
+                            <button class="thumbnail" data-image="putter-front.png" data-alt="Front view of Bettinardi x Eagle Rare putter showing rose gold finish and #22 of 24 numbering">
                                 <img src="putter-front.png" alt="Thumbnail: Front view">
                             </button>
                             <button class="thumbnail" data-image="putter-side.jpg" data-alt="Side profile view of Bettinardi x Eagle Rare putter highlighting the premium craftsmanship">
