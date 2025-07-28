@@ -472,30 +472,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // EmailJS autoresponse function
+    // EmailJS autoresponse function  
     async function sendAutoresponse(userEmail, userName, entryType, entryDetails) {
+        console.log('EmailJS: Starting autoresponse function');
+        console.log('EmailJS: User email:', userEmail);
+        console.log('EmailJS: User name:', userName);
+        console.log('EmailJS: Entry type:', entryType);
+        
+        // Match exactly with form field names and EmailJS template variables
         const emailParams = {
-            to_email: userEmail,
-            to_name: userName,
+            // User info (matching form fields)
+            email: userEmail,                    // Form field: name="email"
+            fullName: userName,                  // Form field: name="fullName"  
+            to_email: userEmail,                 // For EmailJS recipient
+            name: userName,                      // For EmailJS template {{name}}
+            
+            // Entry details  
+            entryType: entryType,               // Form field: name="entryType"
             entry_type: entryType === 'free' ? 'Free Entry' : `Paid Entry (${entryDetails.paymentAmount})`,
             total_entries: entryDetails.totalEntries,
             payment_amount: entryDetails.paymentAmount,
             payment_status: entryDetails.paymentStatus,
+            
+            // Static info
             drawing_date: 'September 30th, 2025',
             company_name: 'Bourbon Dudez LLC',
-            company_email: 'bourborndudezsweepstakes@gmail.com'
+            company_email: 'bourborndudezsweepstakes@gmail.com',
+            
+            // Additional form fields for completeness
+            sweepstakes: 'Bettinardi x Eagle Rare Limited Edition Putter #22 of 24',
+            prize_value: '$1,250'
         };
 
+        console.log('EmailJS: Email parameters:', emailParams);
+
         try {
+            console.log('EmailJS: Attempting to send email...');
             const response = await emailjs.send(
                 'service_ld8ahu9', // EmailJS service ID
                 'template_5d64ia9', // EmailJS template ID
                 emailParams
             );
-            console.log('Autoresponse sent successfully:', response);
+            console.log('EmailJS: Autoresponse sent successfully:', response);
             return true;
         } catch (error) {
-            console.error('Failed to send autoresponse:', error);
+            console.error('EmailJS: Failed to send autoresponse:', error);
+            console.error('EmailJS: Error details:', error);
             return false;
         }
     }
