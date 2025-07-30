@@ -21,13 +21,27 @@ document.addEventListener('DOMContentLoaded', () => {
         addressFormat: 'Address must include street address, city, state, and ZIP code (e.g., "123 Main St, Chicago, IL 60601").'
     };
 
+    // Restricted states
+    const restrictedStates = ['FL', 'NY', 'RI', 'FLORIDA', 'NEW YORK', 'RHODE ISLAND'];
+
     // Address validation function
     function validateAddress(address) {
         const addressStr = address.trim();
         
         // Check minimum length
         if (addressStr.length < 15) {
-            return false;
+            return { isValid: false, error: 'Address is too short' };
+        }
+        
+        // Check for restricted states first
+        const upperAddress = addressStr.toUpperCase();
+        for (const state of restrictedStates) {
+            if (upperAddress.includes(state)) {
+                return { 
+                    isValid: false, 
+                    error: 'This sweepstakes is not available in Florida, New York, or Rhode Island. We apologize for any inconvenience.' 
+                };
+            }
         }
         
         // Check for basic components: street number, street name, city, state, zip
@@ -44,21 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Check for required components
         if (!patterns.hasNumber.test(addressStr)) {
-            return false; // No street number
+            return { isValid: false, error: 'Address must include a street number' };
         }
         
         if (!patterns.hasState.test(addressStr)) {
-            return false; // No state
+            return { isValid: false, error: 'Address must include a valid state' };
         }
         
         if (!patterns.hasZip.test(addressStr)) {
-            return false; // No ZIP code
+            return { isValid: false, error: 'Address must include a valid ZIP code' };
         }
         
         // Check for minimum word count (should have street, city, state, zip components)
         const words = addressStr.split(/\s+/).filter(word => word.length > 0);
         if (words.length < 4) {
-            return false;
+            return { isValid: false, error: 'Please enter a complete address' };
         }
         
         // Check for common separators (commas help indicate city/state separation)
@@ -67,7 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Additional validation: should have street indicator OR be long enough to likely include street name
         const hasStreetInfo = patterns.hasStreetIndicator.test(addressStr) || words.length >= 6;
         
-        return hasCommas && hasStreetInfo;
+        if (!hasCommas || !hasStreetInfo) {
+            return { isValid: false, error: 'Address must include street address, city, state, and ZIP code (e.g., "123 Main St, Chicago, IL 60601")' };
+        }
+        
+        return { isValid: true, error: null };
     }
 
     // Enhanced phone number validation
@@ -311,9 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Enhanced address validation
             else if (fieldName === 'address' && fieldValue) {
-                if (!validateAddress(fieldValue)) {
+                const addressValidation = validateAddress(fieldValue);
+                if (!addressValidation.isValid) {
                     isValid = false;
-                    errorMessage = errorMessages.addressFormat;
+                    errorMessage = addressValidation.error;
                 }
             }
             // Terms checkbox validation
